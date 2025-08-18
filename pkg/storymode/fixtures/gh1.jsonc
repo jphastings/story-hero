@@ -45,6 +45,43 @@
       "isUnlocked": "isSongPurchased"
     },
     {
+      "title": "Thrash and Burn",
+      "songs": [
+        // Queen - Killer Queen
+        // The Exies - Hey You
+        // Incubus - Stellar
+        // Burning Brides - Heart Full of Black
+        // Megadeth - Symphony of Destruction
+      ]
+    }, {
+      "title": "Return of the Shred",
+      "songs": [
+        // David Bowie - Ziggy Stardust
+        // Sum 41 - Fat Lip
+        // Audioslave - Cochise
+        // The Donnas - Take it Off
+        // Helmet - Unsung
+      ]
+    }, {
+      "title": "Fret-Burners",
+      "songs": [
+        // The Jimi Hendrix Experience - Spanish Castle Magic
+        // Red Hot Chili Peppers - Higher Ground
+        // Queens of the Stone Age - No One Knows
+        // Motörhead - Ace of Spades
+        // Cream - Crossroads
+      ]
+    }, {
+      "title": "Face Melters",
+      "songs": [
+        // Blue Öyster Cult - Godzilla
+        // Stevie Ray Vaughan - Texas Flood
+        // The Edgar Winter Group - Frankenstein
+        // Pantera - Cowboys from Hell
+        // Ozzy Osbourne - Bark at the Moon
+      ]
+    },
+    {
       "title": "Hidden Tracks",
       "songs": [
         // Andraleia Buch - Trippolette
