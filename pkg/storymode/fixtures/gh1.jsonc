@@ -1,0 +1,48 @@
+{
+  "title": "Guitar Hero",
+  "groups": [
+    {
+      "title": "Opening Licks",
+      "songs": [
+        // Joan Jett & the Blackhearts - I Love Rock 'n Roll
+        "806a20bbb49cafb16275c29a6090c99a",
+        // Ramones - I Wanna Be Sedated
+        "4776137b3a1a4ff1481c39bd7035d27a",
+        // White Zombie - Thunder Kiss '65
+        "ed3ac5473b8ce5afe02774b6ecba10ad",
+        // Deep Purple - Smoke on the Water
+        "422c6ecb99bea19b6467c3f8c1e0219a",
+        // Bad Religion - Infected
+        "d46b1259fc3278ee69cd0c62732668b4"
+      ]
+    },
+    {
+      "title": "Axe-Grinders",
+      "songs": [
+        // Black Sabbath - Iron Man
+        "15cb2d11e87f0cffdb0b04f291779117",
+        // Boston - More Than a Feeling
+        "cc7e9d33fd6a4eb39ac64a5d7def7df8",
+        // Judas Priest - You've Got Another Thing Comin'
+        "b78ed8db5858aaefd0545adfc6d46e6b",
+        // Franz Ferdinand - Take Me Out
+        "9d2dbec92e065700867c169c16b4fce3",
+        // ZZ Top - Sharp Dressed Man
+        "778eb140327326172d256528bbdec9ff"
+      ],
+      "isUnlocked": "(_) => isGroupCompleted('Opening Licks')"
+    },
+    {
+      "title": "Bonus Tracks",
+      "songs": [
+        // Black Label Society - Fire It Up
+        "85ff914f1d4a5ff1397c2131fa7ead9f"
+        // Cheat on the Church
+        // Caveman Rejoice
+        // Eureka I've Found Love
+        // All of This
+      ],
+      "isUnlocked": "isSongPurchased"
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+packages:
+  - path: "github.com/jphastings/clone-hero-storymode/pkg/storymode"
+    output_path: "pkg/storymode/index.d.ts"
+    frontmatter: |
+      declare global {
+        // Allows access to the story definition (treat as read-only)
+        const story: Story;
+        
+        // Details of the (best) plays for the song with the given ID
+        function plays(id: MD5Hash): SongPlay | undefined
+        
+        // A convenience method that returns the group from the current story with the given title.
+        // Will raise an error if the group doesn't exist.
+        function group(title: string): Group
+        
+        // Configure this story to use state
+        function useState<T>(updater: (previousState: T | null) => T): () => T
+      }
+
+      export enum Difficulty {
+        Easy = 0,
+        Medium = 1,
+        Hard = 2,
+        Expert = 3,
+      }
+
+      export enum Instrument {
+
+      }
+
+      type PerInstrumentScore = Record<Instrument, Score>
+      type UnlockFunc = (songID: MD5Hash) => boolean
+      type SongCompleteFunc = (songPlay: SongPlay) => void
