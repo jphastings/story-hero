@@ -7,7 +7,7 @@ import (
 )
 
 // Ensure tygo is installed: go install github.com/gzuidhof/tygo/cmd@latest
-//go:generate tygo
+//go:generate tygo generate
 
 type Story struct {
 	Title  string  `json:"title"`

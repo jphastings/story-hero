@@ -1,6 +1,6 @@
 packages:
   - path: "github.com/jphastings/clone-hero-storymode/pkg/storymode"
-    output_path: "pkg/storymode/index.d.ts"
+    output_path: "index.d.ts"
     frontmatter: |
       declare global {
         // Allows access to the story definition (treat as read-only)
