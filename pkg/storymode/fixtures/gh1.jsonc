@@ -43,6 +43,14 @@
         // All of This
       ],
       "isUnlocked": "isSongPurchased"
+    },
+    {
+      "title": "Hidden Tracks",
+      "songs": [
+        // Andraleia Buch - Trippolette
+        // Gurney - Graveyard Shift
+      ],
+      "isUnlocked": "(_) => countMeetingStars(5, true) >= 47"
     }
   ]
 }
