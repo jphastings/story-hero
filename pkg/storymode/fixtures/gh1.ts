@@ -4,10 +4,10 @@ import { MD5Hash, Story, UnlockFunc } from ".."
 
 // Unlock functions
 
-export const isGroupCompleted: UnlockFunc = (groupTitle: string): boolean =>
+const isGroupCompleted: UnlockFunc = (groupTitle: string): boolean =>
   group(groupTitle).songs.every((songID) => plays(songID)?.playCount)
 
-export const isSongPurchased: UnlockFunc = (songID: MD5Hash): boolean => getState().purchasedSongs[songID]
+const isSongPurchased: UnlockFunc = (songID: MD5Hash): boolean => getState().purchasedSongs[songID]
 
 // State management
 
@@ -79,7 +79,7 @@ const songShop: Record<MD5Hash, number> = {
 
 // Track definitions
 
-export const story: Story = {
+export default {
   "title": "Guitar Hero",
   "groups": [
     {
@@ -190,4 +190,4 @@ export const story: Story = {
       "isUnlocked": (_) => countMeetingStars(5, true) >= 47
     }
   ]
-}
+} as Story
