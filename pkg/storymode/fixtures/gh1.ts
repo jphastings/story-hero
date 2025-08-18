@@ -2,6 +2,15 @@
 
 import { MD5Hash, UnlockFunc } from ".."
 
+// Unlock functions
+
+export const isGroupCompleted: UnlockFunc = (groupTitle: string): boolean =>
+  group(groupTitle).songs.every((songID) => plays(songID)?.playCount)
+
+export const isSongPurchased: UnlockFunc = (songID: MD5Hash): boolean => getState().purchasedSongs[songID]
+
+// State management
+
 interface State {
   cash: number,
   purchasedSongs: Record<MD5Hash, boolean>,
@@ -9,20 +18,23 @@ interface State {
 
 const getState = useState((previousState: State | null): State => ({
   purchasedSongs: previousState?.purchasedSongs || {},
-  cash: Object.entries(payouts).reduce(
-    (sum, [stars, pay]) => sum + countMeetingStars(Number(stars), true) * pay
-  , 0)
+  cash: cashIn() - cashOut(Object.keys(previousState?.purchasedSongs || {}))
 }))
 
-export const isGroupCompleted: UnlockFunc = (groupTitle: string): boolean =>
-  group(groupTitle).songs.every((songID) => plays(songID)?.playCount)
+const cashIn = () => Object.entries(payouts).reduce(
+  (sum, [stars, pay]) => sum + countMeetingStars(Number(stars), true) * pay
+, 0)
 
-export const isSongPurchased: UnlockFunc = (songID: MD5Hash): boolean => getState().purchasedSongs[songID]
+const cashOut = (purchased: Array<MD5Hash>): number =>
+  purchased.reduce((sum, songID) => sum + songShop[songID], 0)
+
+// Configuration for this story
 
 const payouts: Record<number,number> = {
-  3: 100,
-  4: 300,
+  // Stars -> $
   5: 650,
+  4: 300,
+  3: 100,
 }
 
 const songShop: Record<MD5Hash, number> = {
