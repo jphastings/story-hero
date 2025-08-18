@@ -39,37 +39,37 @@ const payouts: Record<number,number> = {
 
 const songShop: Record<MD5Hash, number> = {
   // Shaimus - All of This
-  "": 250,
+  "dbc36e4f24445c28a567732080b22581": 250,
   // Anarchy Club - Behind the Mask
-  "": 250,
+  "be16e90bb30795ed62209cc8d4ff17e8": 250,
   // Artillery - The Breaking Wheel
-  "": 250,
+  "0ebec2bfea29aeae07eaa1cc44917be7": 250,
   // The Acro-Brats - Callout
-  "": 250,
+  "b61081cd5d5dd7801cd8d62dce8ac279": 250,
   // Drist - Decontrol
-  "": 250,
+  "f6f8a11a2b3bb64bbb56f76c47b52e09": 250,
   // The Slip - Even Rats
-  "": 250,
+  "934e14a4015609d79939f053d61b0562": 250,
   // Made in Mexico - Farewell Myth
-  "": 250,
+  "f843e2bd2706f79d496e4e11a2dee339": 250,
   // Din - Fly on the Wall
-  "": 250,
+  "3f8cf84eedcb278686cfb973a190700c": 250,
   // Freezepop - Get Ready 2 Rokk
-  "": 250,
-  // Monkey Steals the Peach - Guitar Hero -[
-  "": 250,
+  "5810143a0fa57e2b4c3cd2fec25acccb": 250,
+  // Monkey Steals the Peach - Guitar Hero
+  "86764ca81f7194df0b96900ed28536ad": 250,
   // Honest Bob and the Factory-to-Dealer Incentives - Hey
-  "": 250,
+  "619b15b43c5e60c36285f2a9a50ad786": 250,
   // Count Zero - Sail Your Ship By
-  "": 250,
+  "5849a22be1e7a568edb8d488f02206d4": 250,
   // The Bags - Cavemen Rejoice
-  "": 300,
-  // Cheat on the Church - Graveyard BBQ
-  "": 300,
+  "e7dccf97d331192881606de4eabd13e8": 300,
+  // Graveyard BBQ - Cheat on the Church
+  "b9adf49b89045e44d81cb2613c027a09": 300,
   // The Upper Crust - Eureka, I've Found Love
-  "": 300,
+  "442602f2650596ea97e17ff20dfc4c1d": 300,
   // Black Label Society - Fire it Up
   "85ff914f1d4a5ff1397c2131fa7ead9f": 300,
   // The Model Sons - Story of My Love
-  "": 300,
+  "2911ebab0b318fbf84e2729e728ec309": 300,
 }
