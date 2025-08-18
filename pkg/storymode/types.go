@@ -6,6 +6,9 @@ import (
 	"math/big"
 )
 
+// Ensure tygo is installed: go install github.com/gzuidhof/tygo/cmd@latest
+//go:generate tygo
+
 type Story struct {
 	Title  string  `json:"title"`
 	Groups []Group `json:"groups"`
