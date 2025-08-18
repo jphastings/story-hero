@@ -7,32 +7,12 @@ interface State {
   purchasedSongs: Record<MD5Hash, boolean>,
 }
 
-function updateState(previousState: State | null): State {
-  const purchasedSongs = previousState?.purchasedSongs || {}
-
-  const cash = story.groups.reduce(
-    (totalCash, group) => totalCash + group.songs.reduce(
-      (groupCash, songID) => groupCash + cashForSong(songID)
-    , 0)
+const getState = useState((previousState: State | null): State => ({
+  purchasedSongs: previousState?.purchasedSongs || {},
+  cash: Object.entries(payouts).reduce(
+    (sum, [stars, pay]) => sum + countMeetingStars(Number(stars), true) * pay
   , 0)
-
-  return { cash, purchasedSongs }
-}
-
-function cashForSong(songID: MD5Hash): number {
-  const play = plays(songID)
-  if (!play) {
-    return 0
-  }
-
-  const stars = Object.values(play.scores).reduce(
-    (currentMaxStars, score) => Math.max(currentMaxStars, score.stars)
-  , 0)
-
-  return payouts[stars] || 0
-}
-
-const getState = useState(updateState)
+}))
 
 export const isGroupCompleted: UnlockFunc = (groupTitle: string): boolean =>
   group(groupTitle).songs.every((songID) => plays(songID)?.playCount)
@@ -40,7 +20,7 @@ export const isGroupCompleted: UnlockFunc = (groupTitle: string): boolean =>
 export const isSongPurchased: UnlockFunc = (songID: MD5Hash): boolean => getState().purchasedSongs[songID]
 
 const payouts: Record<number,number> = {
-  // What about other star ratings?
+  3: 100,
   4: 300,
   5: 650,
 }

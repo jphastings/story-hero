@@ -2,22 +2,40 @@
 declare global {
   // Allows access to the story definition (treat as read-only)
   const story: Story;
-  // Plays for the song with the given ID
+  
+  // Details of the (best) plays for the song with the given ID
   function plays(id: MD5Hash): SongPlay | undefined
-  // A convenience method that returns the group from the current story with the given title. Will raise an error if the group doesn't exist
+  
+  // A convenience method that returns the group from the current story with the given title.
+  // Will raise an error if the group doesn't exist.
   function group(title: string): Group
+
+  // A convenience method that returns the total stars across all songs in all groups in this story
+  function totalStars(): number
+  // A convenience method that returns the total score across all songs in all groups in this story
+  function totalScore(): number
+  // A convenience method that returns the number of songs in this story with a score equal to (only: true) or equal/greater than (only: false) the number provided
+  function countMeetingScore(score: number, only: boolean): number
+  // A convenience method that returns the number of songs in this story with a percentage equal to (only: true) or equal/greater than (only: false) the number provided
+  function countMeetingPercentage(score: number, only: boolean): number
+  // A convenience method that returns the number of songs in this story with stars equal to (only: true) or equal/greater than (only: false) the number provided
+  function countMeetingStars(stars: number, only: boolean): number
+  
   // Configure this story to use state
   function useState<T>(updater: (previousState: T | null) => T): () => T
 }
+
 export enum Difficulty {
   Easy = 0,
-  Medium,
-  Hard,
-  Expert,
+  Medium = 1,
+  Hard = 2,
+  Expert = 3,
 }
+
 export enum Instrument {
 
 }
+
 type PerInstrumentScore = Record<Instrument, Score>
 type UnlockFunc = (songID: MD5Hash) => boolean
 type SongCompleteFunc = (songPlay: SongPlay) => void
