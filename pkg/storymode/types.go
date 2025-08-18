@@ -15,9 +15,12 @@ type Story struct {
 }
 
 type Group struct {
-	Title      string    `json:"title"`
-	Songs      []MD5Hash `json:"songs"`
-	IsUnlocked string    `json:"isUnlocked,omitempty" tstype:"UnlockFunc"`
+	Title           string    `json:"title"`
+	Songs           []MD5Hash `json:"songs"`
+	IsUnlocked      string    `json:"isUnlocked,omitempty" tstype:"UnlockFunc"`
+	LockedMessage   string    `json:"lockedMessage,omitempty"`
+	ShowLockedSongs bool      `json:"showLockedSongs,omitempty"`
+	UnlockAction    string    `json:"unlockAction,omitempty" tstype:"ActionFunc"`
 }
 
 type SongPlay struct {

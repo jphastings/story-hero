@@ -22,23 +22,25 @@ declare global {
   function countMeetingStars(stars: number, only: boolean): number
   
   // Configure this story to use state
-  function useState<T>(updater: (previousState: T | null) => T): () => T
+  function useState<T>(init: (storedState: T | null) => T): [() => T, ((updater: (previousState: T) => T) => void)]
+
+  export enum Difficulty {
+    Easy = 0,
+    Medium = 1,
+    Hard = 2,
+    Expert = 3,
+  }
+
+  export enum Instrument {
+
+  }
+
+  type PerInstrumentScore = Record<Instrument, Score>
+  // A function which declares whether a given song is unlocked
+  type UnlockFunc = (songID: MD5Hash) => boolean
+  // A function which defines an action on a song, and whether that action can currently be performed
+  type ActionFunc = (songID: MD5Hash) => boolean | (() => void)
 }
-
-export enum Difficulty {
-  Easy = 0,
-  Medium = 1,
-  Hard = 2,
-  Expert = 3,
-}
-
-export enum Instrument {
-
-}
-
-type PerInstrumentScore = Record<Instrument, Score>
-type UnlockFunc = (songID: MD5Hash) => boolean
-type SongCompleteFunc = (songPlay: SongPlay) => void
 
 //////////
 // source: types.go
@@ -51,6 +53,9 @@ export interface Group {
   title: string;
   songs: MD5Hash[];
   isUnlocked?: UnlockFunc;
+  lockedMessage?: string;
+  showLockedSongs?: boolean;
+  unlockAction?: ActionFunc;
 }
 export interface SongPlay {
   id: MD5Hash;

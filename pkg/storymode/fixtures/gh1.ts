@@ -1,6 +1,6 @@
 /// <reference path="../index.d.ts" />
 
-import { MD5Hash, Story, UnlockFunc } from ".."
+import { MD5Hash, Story } from ".."
 
 // Unlock functions
 
@@ -9,6 +9,19 @@ const isGroupCompleted = (groupTitle: string): boolean =>
 
 const isSongPurchased: UnlockFunc = (songID: MD5Hash): boolean => getState().purchasedSongs[songID]
 
+const purchaseSong: ActionFunc = (songID: MD5Hash): false | (() => void) => {
+  const cost = songShop[songID]
+  if (!cost || cost > getState().cash) {
+    return false
+  }
+
+  return (): void => updateState((state: State) => {
+    state.cash -= cost
+    state.purchasedSongs[songID] = true
+    return state
+  })
+}
+
 // State management
 
 interface State {
@@ -16,9 +29,9 @@ interface State {
   purchasedSongs: Record<MD5Hash, boolean>,
 }
 
-const getState = useState((previousState: State | null): State => ({
-  purchasedSongs: previousState?.purchasedSongs || {},
-  cash: cashIn() - cashOut(Object.keys(previousState?.purchasedSongs || {}))
+const [getState, updateState] = useState((storedState: State | null): State => ({
+  purchasedSongs: storedState?.purchasedSongs || {},
+  cash: cashIn() - cashOut(Object.keys(storedState?.purchasedSongs || {}))
 }))
 
 const cashIn = () => Object.entries(payouts).reduce(
@@ -79,12 +92,14 @@ const songShop: Record<MD5Hash, number> = {
 
 // Track definitions
 
+const lockedMessage = "Beat 5/5 songs to continue"
+
 const story: Story = {
-  "title": "Guitar Hero",
-  "groups": [
+  title: "Guitar Hero",
+  groups: [
     {
-      "title": "Opening Licks",
-      "songs": [
+      title: "Opening Licks",
+      songs: [
         // Joan Jett & the Blackhearts - I Love Rock 'n Roll
         "806a20bbb49cafb16275c29a6090c99a",
         // Ramones - I Wanna Be Sedated
@@ -98,8 +113,8 @@ const story: Story = {
       ]
     },
     {
-      "title": "Axe-Grinders",
-      "songs": [
+      title: "Axe-Grinders",
+      songs: [
         // Black Sabbath - Iron Man
         "15cb2d11e87f0cffdb0b04f291779117",
         // Boston - More Than a Feeling
@@ -111,11 +126,12 @@ const story: Story = {
         // ZZ Top - Sharp Dressed Man
         "778eb140327326172d256528bbdec9ff"
       ],
-      "isUnlocked": (_) => isGroupCompleted('Opening Licks')
+      isUnlocked: (_) => isGroupCompleted('Opening Licks'),
+      lockedMessage
     },
     {
-      "title": "Thrash and Burn",
-      "songs": [
+      title: "Thrash and Burn",
+      songs: [
         // Queen - Killer Queen
         "6bc631e3ae627c6d4e6778e203a12919",
         // The Exies - Hey You
@@ -127,10 +143,11 @@ const story: Story = {
         // Megadeth - Symphony of Destruction
         "7ac8287a899ebbf095a836b97968c185"
       ],
-      "isUnlocked": (_) => isGroupCompleted('Axe-Grinders')
+      isUnlocked: (_) => isGroupCompleted('Axe-Grinders'),
+      lockedMessage
     }, {
-      "title": "Return of the Shred",
-      "songs": [
+      title: "Return of the Shred",
+      songs: [
         // David Bowie - Ziggy Stardust
         "ebdfd37ca2bf9bbeb1ec9f741209ba41",
         // Sum 41 - Fat Lip
@@ -142,10 +159,11 @@ const story: Story = {
         // Helmet - Unsung
         "90d19bede0572f4b53800eaa9a5f07dd"
       ],
-      "isUnlocked": (_) => isGroupCompleted('Thrash and Burn')
+      isUnlocked: (_) => isGroupCompleted('Thrash and Burn'),
+      lockedMessage
     }, {
-      "title": "Fret-Burners",
-      "songs": [
+      title: "Fret-Burners",
+      songs: [
         // The Jimi Hendrix Experience - Spanish Castle Magic
         "2aef4a167321b49e21ab1ba976cfb8bf",
         // Red Hot Chili Peppers - Higher Ground
@@ -157,10 +175,11 @@ const story: Story = {
         // Cream - Crossroads
         "847fc809b488b6fe7d2dd24ae71081ed"
       ],
-      "isUnlocked": (_) => isGroupCompleted('Return of the Shred')
+      isUnlocked: (_) => isGroupCompleted('Return of the Shred'),
+      lockedMessage
     }, {
-      "title": "Face Melters",
-      "songs": [
+      title: "Face Melters",
+      songs: [
         // Blue Öyster Cult - Godzilla
         "66ac6bfceb61ab2b74507c60dff8a294",
         // Stevie Ray Vaughan - Texas Flood
@@ -172,22 +191,25 @@ const story: Story = {
         // Ozzy Osbourne - Bark at the Moon
         "9334d685bc36a1b75d741355c8378f23"
       ],
-      "isUnlocked": (_) => isGroupCompleted('Fret-Burners')
+      isUnlocked: (_) => isGroupCompleted('Fret-Burners'),
+      lockedMessage
     },
     {
-      "title": "Bonus Tracks",
-      "songs": Object.keys(songShop),
-      "isUnlocked": isSongPurchased
+      title: "Bonus Tracks",
+      songs: Object.keys(songShop),
+      isUnlocked: isSongPurchased,
+      showLockedSongs: true,
+      unlockAction: purchaseSong
     },
     {
-      "title": "Hidden Tracks",
-      "songs": [
+      title: "Hidden Tracks",
+      songs: [
         // Andraleia Buch - Trippolette
         "783f5e0eb7a332364b3ed4170f341318",
         // Gurney - Graveyard Shift
         "c1e8fcc0c538594cdae40a4bc3bbca70"
       ],
-      "isUnlocked": (_) => countMeetingStars(5, true) >= 47
+      isUnlocked: (_) => countMeetingStars(5, true) >= 47
     }
   ]
 }
