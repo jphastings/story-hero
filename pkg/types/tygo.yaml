@@ -1,0 +1,43 @@
+packages:
+  - path: "github.com/jphastings/clone-hero-storymode/pkg/types"
+    output_path: "../index.d.ts"
+    frontmatter: |
+      declare global {
+        // Define the details of your story
+        function defineStory(story: Story): void
+                
+        // Configure this story to use state
+        // If your state uses any convenience methods, make sure you've called storyDefinition first
+        function useState<T>(init: (storedState: T | null) => T): [() => T, ((updater: (previousState: T) => T) => void)]
+
+        // Details of the (best) plays for the song with the given ID
+        function plays(id: MD5Hash): SongPlay | undefined
+
+        // A convenience method that returns the total stars (for the best gig across instruments) for all songs in all groups in this story
+        function totalStars(): number
+        // A convenience method that returns the total score (for the best gig across instruments) for all songs in all groups in this story
+        function totalScore(): number
+        // A convenience method that returns the number of songs in this story with a best score (across instruments) equal to (only: true) or equal/greater than (only: false) the number provided
+        function countMeetingScore(score: number, only: boolean): number
+        // A convenience method that returns the number of songs in this story with a best percentage (across instruments) equal to (only: true) or equal/greater than (only: false) the number provided
+        function countMeetingPercentage(score: number, only: boolean): number
+        // A convenience method that returns the number of songs in this story with best stars (across instruments) equal to (only: true) or equal/greater than (only: false) the number provided
+        function countMeetingStars(stars: number, only: boolean): number
+
+        export enum Difficulty {
+          Easy = 0,
+          Medium = 1,
+          Hard = 2,
+          Expert = 3,
+        }
+
+        export enum Instrument {
+
+        }
+
+        type PerInstrumentScore = Record<Instrument, Score>
+        // A function which declares whether a given song is unlocked
+        type UnlockFunc = (songID: MD5Hash) => boolean
+        // A function which defines an action on a song, and whether that action can currently be performed
+        type ActionFunc = (songID: MD5Hash) => boolean | (() => void)
+      }

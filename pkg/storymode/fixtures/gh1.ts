@@ -1,13 +1,11 @@
-/// <reference path="../index.d.ts" />
-
-import { MD5Hash, Story } from ".."
+import { MD5Hash, Story } from "storymode"
 
 // Unlock functions
 
 const isGroupCompleted = (groupTitle: string): boolean =>
-  group(groupTitle).songs.every((songID) => plays(songID)?.playCount)
+  story.groups.find((g) => g.title == groupTitle)?.songs.every((songID) => plays(songID)?.playCount)
 
-const isSongPurchased: UnlockFunc = (songID: MD5Hash): boolean => getState().purchasedSongs[songID]
+const isSongPurchased: UnlockFunc = (songID: MD5Hash): boolean => getState().purchasedSongs[songID] === true
 
 const purchaseSong: ActionFunc = (songID: MD5Hash): false | (() => void) => {
   const cost = songShop[songID]
@@ -21,25 +19,6 @@ const purchaseSong: ActionFunc = (songID: MD5Hash): false | (() => void) => {
     return state
   })
 }
-
-// State management
-
-interface State {
-  cash: number,
-  purchasedSongs: Record<MD5Hash, boolean>,
-}
-
-const [getState, updateState] = useState((storedState: State | null): State => ({
-  purchasedSongs: storedState?.purchasedSongs || {},
-  cash: cashIn() - cashOut(Object.keys(storedState?.purchasedSongs || {}))
-}))
-
-const cashIn = () => Object.entries(payouts).reduce(
-  (sum, [stars, pay]) => sum + countMeetingStars(Number(stars), true) * pay
-, 0)
-
-const cashOut = (purchased: Array<MD5Hash>): number =>
-  purchased.reduce((sum, songID) => sum + songShop[songID], 0)
 
 // Configuration for this story
 
@@ -213,5 +192,25 @@ const story: Story = {
     }
   ]
 }
+defineStory(story)
 
-export default story
+// State management
+
+interface State {
+  cash: number,
+  purchasedSongs: Record<MD5Hash, boolean>,
+}
+
+const cashIn = () => Object.entries(payouts).reduce(
+  (sum, [stars, pay]) => sum + countMeetingStars(Number(stars), true) * pay
+, 0)
+
+const cashOut = (purchased: Array<MD5Hash>): number =>
+  purchased.reduce((sum, songID) => sum + songShop[songID], 0)
+
+const [getState, updateState] = useState((storedState: State | null): State => {
+  const purchasedSongs = storedState?.purchasedSongs || {}
+  const cash = cashIn() - cashOut(Object.keys(purchasedSongs))
+
+  return { purchasedSongs, cash }
+})

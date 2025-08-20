@@ -9,12 +9,12 @@ import (
 )
 
 func TestParseGH1Fixture(t *testing.T) {
-	file, err := os.Open("fixtures/gh1.ini")
+	file, err := os.Open("fixtures/gh1.ts")
 	assert.NoError(t, err, "Failed to open fixture file")
 	defer file.Close()
 
-	story, err := storymode.Parse(file)
+	s, err := storymode.LoadStory(file, nil, nil)
 	assert.NoError(t, err, "Failed to parse story")
 
-	assert.Equal(t, "Guitar Hero", story.Title)
+	assert.Equal(t, "Guitar Hero", s.Story.Title)
 }

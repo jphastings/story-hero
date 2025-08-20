@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "lib": ["ES2023"],
+    "baseUrl": "../../",
+    "paths": {
+      "storymode": ["./index.d.ts"]
+    }
+  }
+}
