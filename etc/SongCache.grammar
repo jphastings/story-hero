@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ufwb version="1.24">
+    <grammar name="Clone Hero Song Cache" start="id:17" author="JP Hastings-Spital" email="hello@byjp.me" fileextension=".bin">
+        <description>A first pass at Song Hero's song cache format. (`songcache.bin`)
+
+There are some parts I can't find documentation for, and haven't been able to reverse engineer with some cursory attempts. What's here is pretty useful as it is!</description>
+        <scripts>
+            <script name="VarInt length string" type="DataType" id="27">
+                <source language="Python"># custom data type script
+
+# Allows parsing of varint-length prefixed strings
+
+def parseByteRange(element, byteView, bitPos, bitLength, results):
+  &quot;&quot;&quot;parseByteRange method&quot;&quot;&quot;
+
+  processedBytes = 0
+  byteRead = 128 # So we read the first byte
+  bytePos = bitPos // 8
+  strLen = 0
+  iteration = 0
+
+  while (byteRead &gt; 127):
+    byteRead = byteView.readUnsignedInt(bytePos, 1, ENDIAN_LITTLE)
+    strLen += (byteRead % 128) &lt;&lt; (7 * processedBytes)
+
+    bytePos += 1
+    processedBytes += 1
+
+  dataString = byteView.readString(bytePos, strLen, &quot;UTF-8&quot;)
+  processedBytes += strLen
+
+  # create and set new value
+  value = Value()
+  value.setString(dataString)
+
+
+  results.addElement(element, processedBytes, iteration, value)
+
+  # return number of processed bytes
+  return processedBytes
+
+def fillByteRange(value, byteArray, bitPos, bitLength):
+  &quot;&quot;&quot;fillByteRange method&quot;&quot;&quot;
+
+  dataString = value.getString()
+
+  # TODO: handle strings longer than 127 bytes long
+  byteArray.writeUnsignedIntBits(0, bitPos, 1, ENDIAN_LITTLE)
+</source>
+            </script>
+        </scripts>
+        <structure name="SongCache" id="17" encoding="UTF-8" endian="little" signed="no">
+            <binary name="Header" id="18" length="20"/>
+            <structref name="Titles" id="20" structure="id:19"/>
+            <structref name="Artists" id="21" structure="id:19"/>
+            <structref name="Albums" id="22" structure="id:19"/>
+            <structref name="Genres" id="23" structure="id:19"/>
+            <structref name="Years" id="24" structure="id:19"/>
+            <structref name="Charters" id="25" structure="id:19"/>
+            <structref name="Playlists" id="26" structure="id:19"/>
+            <number name="Song_count" id="27" type="integer" length="4"/>
+            <structure name="Song Metadata" id="28" length="0" repeatmin="Song_count" repeatmax="Song_count">
+                <custom name="Path" id="29" script="id:27"/>
+                <binary name="Unknown (checksum?)" id="30" length="16"/>
+                <custom name="Chart" id="31" script="id:27"/>
+                <binary name="Unknown-a" id="32" length="1"/>
+                <offset name="Title" id="33" length="4" references="id:19" relative-to="id:20" follownullreference="no" display="decimal"/>
+                <offset name="Artist" id="34" length="4" references="id:19" relative-to="id:21" follownullreference="no" display="decimal"/>
+                <offset name="Album" id="35" length="4" references="id:19" relative-to="id:22" follownullreference="no" display="decimal"/>
+                <offset name="Genre" id="36" length="4" references="id:19" relative-to="id:23" follownullreference="no" display="decimal"/>
+                <offset name="Year" id="37" length="4" references="id:19" relative-to="id:24" follownullreference="no" display="decimal"/>
+                <offset name="Charter" id="38" length="4" references="id:19" relative-to="id:25" follownullreference="no" display="decimal"/>
+                <offset name="Playlist" id="39" length="4" references="id:19" relative-to="id:26" follownullreference="no" display="decimal"/>
+                <number name="Unknown-b" id="40" type="integer" length="8"/>
+                <structure name="Instrument Difficulty" id="41">
+                    <number name="Has Pro Drums?" id="42" type="integer" length="1">
+                        <description>Is usually 1, but is 0 when coop guitar is shown?
+</description>
+                        <fixedvalues>
+                            <fixedvalue name="Unavailable" value="255"/>
+                        </fixedvalues>
+                    </number>
+                    <number name="Band" id="43" type="integer" length="1"/>
+                    <number name="Guitar" id="44" type="integer" length="1"/>
+                    <number name="Rhythm guitar" id="45" type="integer" length="1"/>
+                    <number name="Guitar (Coop)" id="46" type="integer" length="1"/>
+                    <number name="Bass" id="47" type="integer" length="1"/>
+                    <number name="Drums" id="48" type="integer" length="1"/>
+                    <number name="Drums (Real)" id="49" type="integer" length="1"/>
+                    <number name="Keys (Real)" id="50" type="integer" length="1"/>
+                    <number name="Guitar (GH Live)" id="51" type="integer" length="1"/>
+                    <number name="Bass (GH Live)" id="52" type="integer" length="1"/>
+                    <number name="? (GH Live)?" id="53" type="integer" length="1"/>
+                    <number name="Rhythm (GH Live)" id="54" type="integer" length="1"/>
+                </structure>
+                <number name="Preview offset" id="56" type="integer" length="4"/>
+                <custom name="Icon" id="57" script="id:27"/>
+                <number name="Unknown-c" id="58" type="integer" length="8"/>
+                <number name="Song length (ms)" id="59" type="integer" length="4"/>
+                <number name="Unknown-d" id="60" type="integer" length="8"/>
+                <custom name="Game name" id="61" script="id:27"/>
+                <binary name="Delimiter?" id="62" length="1"/>
+                <binary name="Chart MD5" id="63" length="16"/>
+            </structure>
+        </structure>
+        <structure name="Lookup table" id="19" encoding="UTF-8" endian="little" signed="no">
+            <binary name="Type" mustmatch="yes" id="66" length="1">
+                <fixedvalues>
+                    <fixedvalue name="Title" value="00"/>
+                    <fixedvalue name="Artist" value="01"/>
+                    <fixedvalue name="Album" value="02"/>
+                    <fixedvalue name="Genre" value="03"/>
+                    <fixedvalue name="Year" value="04"/>
+                    <fixedvalue name="Charter" value="05"/>
+                    <fixedvalue name="Playlist" value="06"/>
+                </fixedvalues>
+            </binary>
+            <number name="Entry_count" id="67" type="integer" length="4"/>
+            <custom name="Entry" id="68" repeatmin="Entry_count" repeatmax="Entry_count" length="1" script="id:27"/>
+        </structure>
+    </grammar>
+</ufwb>

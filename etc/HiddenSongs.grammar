@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ufwb version="1.24">
+    <grammar name="Clone Hero Hidden Songs" start="id:14" author="JP Hastings-Spital" email="hello@byjp.me" fileextension=".bin" complete="yes">
+        <description>The trivial grammar for my custom 'hiddensongs.bin' file format.</description>
+        <structure name="Hidden songs" id="14" length="0" encoding="UTF-8" endian="little" signed="no">
+            <binary name="SongID" id="15" repeatmin="0" repeatmax="-1" length="16"/>
+        </structure>
+    </grammar>
+</ufwb>
