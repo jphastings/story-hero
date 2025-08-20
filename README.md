@@ -3,7 +3,7 @@
 This is a (work in progress!) Clone Hero companion program that enables "story/career mode" play throughs.
 
 > [!WARNING]
-> This is incomplete & will not function for you today. If you want to help, the [Clone Hero Mod](https://discord.com/channels/424748428451381248/1407613636763193385) is the last step!
+> This is incomplete & will not function for you today. If you want to help, the [Clone Hero Mod](https://discord.com/channels/424748428451381248/1407613636763193385) (or discovering another method to mark a song as hidden) is the last step!
 
 ## How it works
 
