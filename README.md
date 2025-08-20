@@ -18,7 +18,7 @@ This app:
 Then, the [unstarted Clone Hero Mod](https://discord.com/channels/424748428451381248/1407613636763193385) will:
 
 1. Watch the `hiddensongs.bin` for changes, and when there are…
-2. Hide the specified songs from Clone Hero
+2. Hide the specified songs from Clone Hero _for the correct profile_.
 
 ## The details
 
@@ -36,8 +36,8 @@ I'll gladly take suggestions for improving these (just raise an issue here on Gi
 
 ## TODO
 
-- [ ] Read story definition files from within the configured Clone Hero song directories
-- [ ] Only enable stories you have the songs for
+- [x] Read story definition files from within the configured Clone Hero song directories
+- [x] Only enable stories you have the songs for
 - [ ] Better logging, feedback & reliability
 - [ ] OMG tests.
   - Something simple to cover the TypeScript <-> Go conversion would be good

@@ -9,7 +9,8 @@ import (
 )
 
 type SongCache struct {
-	f            *os.File
+	path string
+
 	lookupTables map[lookupAttr][]string
 	Songs        map[types.MD5Hash]*types.Song
 }
@@ -22,30 +23,36 @@ const (
 	// Others not needed at this time
 )
 
-func OpenSongCache(f *os.File) (*SongCache, error) {
-	sc := &SongCache{f: f}
+func OpenSongCache(path string) (*SongCache, error) {
+	sc := &SongCache{path: path}
 	if err := sc.Reload(); err != nil {
 		return nil, err
 	}
+
 	return sc, nil
 }
 
 func (sc *SongCache) Reload() error {
-	_, err := sc.f.Seek(0, io.SeekStart)
+	f, err := os.Open(sc.path)
 	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	if _, err := f.Seek(0, io.SeekStart); err != nil {
 		return fmt.Errorf("unable to interact with the SongCache file: %w", err)
 	}
 
 	// Skip header (20 bytes)
-	if _, err := sc.f.Seek(20, io.SeekCurrent); err != nil {
+	if _, err := f.Seek(20, io.SeekCurrent); err != nil {
 		return fmt.Errorf("failed to skip header: %w", err)
 	}
 
-	if err := sc.readLookupTables(); err != nil {
+	if err := sc.readLookupTables(f); err != nil {
 		return err
 	}
 
-	songCount, err := readUint32(sc.f)
+	songCount, err := readUint32(f)
 	if err != nil {
 		return err
 	}
@@ -53,7 +60,7 @@ func (sc *SongCache) Reload() error {
 	sc.Songs = make(map[types.MD5Hash]*types.Song)
 
 	for i := uint(0); i < songCount; i++ {
-		song, err := sc.readSong()
+		song, err := sc.readSong(f)
 		if err != nil {
 			return err
 		}
@@ -64,20 +71,20 @@ func (sc *SongCache) Reload() error {
 	return nil
 }
 
-func (sc *SongCache) readLookupTable() (lookupAttr, []string, error) {
-	tableType, err := readUint8(sc.f)
+func (sc *SongCache) readLookupTable(r io.Reader) (lookupAttr, []string, error) {
+	tableType, err := readUint8(r)
 	if err != nil {
 		return 0, nil, err
 	}
 
-	entryCount, err := readUint32(sc.f)
+	entryCount, err := readUint32(r)
 	if err != nil {
 		return 0, nil, err
 	}
 
 	table := make([]string, entryCount)
 	for i := uint(0); i < entryCount; i++ {
-		entry, err := readPrefixLengthString(sc.f)
+		entry, err := readPrefixLengthString(r)
 		if err != nil {
 			return 0, nil, err
 		}
@@ -90,11 +97,11 @@ func (sc *SongCache) readLookupTable() (lookupAttr, []string, error) {
 
 const countLookupTables = 7
 
-func (sc *SongCache) readLookupTables() error {
+func (sc *SongCache) readLookupTables(r io.Reader) error {
 	sc.lookupTables = make(map[lookupAttr][]string)
 
 	for i := 0; i < countLookupTables; i++ {
-		tType, table, err := sc.readLookupTable()
+		tType, table, err := sc.readLookupTable(r)
 		if err != nil {
 			return err
 		}
@@ -104,33 +111,33 @@ func (sc *SongCache) readLookupTables() error {
 	return nil
 }
 
-func (sc *SongCache) readSong() (*types.Song, error) {
-	path, err := readPrefixLengthString(sc.f)
+func (sc *SongCache) readSong(rs io.ReadSeeker) (*types.Song, error) {
+	path, err := readPrefixLengthString(rs)
 	if err != nil {
 		return nil, err
 	}
 
 	// Skip unknown (checksum?) (16 bytes)
-	if err := skipBytes(sc.f, 16); err != nil {
+	if err := skipBytes(rs, 16); err != nil {
 		return nil, err
 	}
 
 	// Skip chart
-	if err := skipPrefixLengthString(sc.f); err != nil {
+	if err := skipPrefixLengthString(rs); err != nil {
 		return nil, err
 	}
 
 	// Skip Unknown-a
-	if err := skipBytes(sc.f, 1); err != nil {
+	if err := skipBytes(rs, 1); err != nil {
 		return nil, err
 	}
 
-	title, err := sc.readLookupValue(lookupAttrTitle)
+	title, err := sc.readLookupValue(rs, lookupAttrTitle)
 	if err != nil {
 		return nil, err
 	}
 
-	artist, err := sc.readLookupValue(lookupAttrArtist)
+	artist, err := sc.readLookupValue(rs, lookupAttrArtist)
 	if err != nil {
 		return nil, err
 	}
@@ -139,34 +146,34 @@ func (sc *SongCache) readSong() (*types.Song, error) {
 	// Skip unknown-b (8 bytes)
 	// Skip instrument difficulty (13 bytes)
 	// Skip preview offset (4 bytes)
-	if err := skipBytes(sc.f, 45); err != nil {
+	if err := skipBytes(rs, 45); err != nil {
 		return nil, err
 	}
 
 	// Skip icon (varint string)
-	if err := skipPrefixLengthString(sc.f); err != nil {
+	if err := skipPrefixLengthString(rs); err != nil {
 		return nil, err
 	}
 
 	// Skip unknown-c (8 bytes)
 	// Skip song length (4 bytes)
 	// Skip unknown-d (8 bytes)
-	if err := skipBytes(sc.f, 20); err != nil {
+	if err := skipBytes(rs, 20); err != nil {
 		return nil, err
 	}
 
 	// Skip game name (varint string)
-	if err := skipPrefixLengthString(sc.f); err != nil {
+	if err := skipPrefixLengthString(rs); err != nil {
 		return nil, err
 	}
 
 	// Skip delimiter (1 byte)
-	if err := skipBytes(sc.f, 1); err != nil {
+	if err := skipBytes(rs, 1); err != nil {
 		return nil, err
 	}
 
 	// Read chart MD5 (16 bytes)
-	songID, err := readSongID(sc.f)
+	songID, err := readSongID(rs)
 	if err != nil {
 		return nil, err
 	}
@@ -179,8 +186,8 @@ func (sc *SongCache) readSong() (*types.Song, error) {
 	}, nil
 }
 
-func (sc *SongCache) readLookupValue(la lookupAttr) (string, error) {
-	offset, err := readUint32(sc.f)
+func (sc *SongCache) readLookupValue(r io.Reader, la lookupAttr) (string, error) {
+	offset, err := readUint32(r)
 	if err != nil {
 		return "", err
 	}

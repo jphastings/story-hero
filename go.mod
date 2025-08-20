@@ -5,10 +5,12 @@ go 1.24.3
 require (
 	github.com/clarkmcc/go-typescript v0.7.0
 	github.com/dop251/goja v0.0.0-20211115154819-26ebff68a7d5
+	github.com/dop251/goja_nodejs v0.0.0-20210225215109-d91c329300e7
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/go-viper/mapstructure/v2 v2.4.0
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/stretchr/testify v1.10.0
+	gopkg.in/ini.v1 v1.67.0
 )
 
 require (

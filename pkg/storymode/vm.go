@@ -4,12 +4,18 @@ import (
 	"fmt"
 
 	"github.com/dop251/goja"
+	"github.com/dop251/goja_nodejs/console"
+	"github.com/dop251/goja_nodejs/require"
+
 	"github.com/go-viper/mapstructure/v2"
 	"github.com/jphastings/story-hero/pkg/types"
 )
 
 func (s *StoryHeroState) prepareVM() {
 	s.vm = goja.New()
+
+	require.NewRegistry().Enable(s.vm)
+	console.Enable(s.vm)
 
 	s.vm.Set("exports", s.vm.NewObject())
 
@@ -44,11 +50,11 @@ func (s *StoryHeroState) songPlayIterator(fn SongPlayIterator) func() uint {
 }
 
 func (s *StoryHeroState) countMeeting(fn SongPlayIterator) func(uint, bool) uint {
-	return func(meeting uint, only bool) uint {
+	return func(meeting uint, exactly bool) uint {
 		return s.songPlayIterator(func(sp types.SongPlay) uint {
-			if only && fn(sp) >= meeting {
+			if exactly && fn(sp) >= meeting {
 				return 1
-			} else if !only && fn(sp) > meeting {
+			} else if !exactly && fn(sp) > meeting {
 				return 1
 			}
 			return 0
@@ -76,13 +82,11 @@ func maxStars(sp types.SongPlay) uint {
 	return maxStars
 }
 
-// Kludge for now, percentages are treated as uint; which they mostly are…
 func maxPercentage(sp types.SongPlay) uint {
-	maxPercentage := float64(0)
+	maxPercentage := uint(0)
 	for _, score := range sp.Scores {
-		percentage, _ := score.Percentage.Float64()
-		if percentage > maxPercentage {
-			maxPercentage = percentage
+		if score.Percentage > maxPercentage {
+			maxPercentage = score.Percentage
 		}
 	}
 	return uint(maxPercentage)
@@ -122,12 +126,11 @@ func (s *StoryHeroState) isUnlocked(g types.Group, songID types.MD5Hash) (bool, 
 }
 
 func (s *StoryHeroState) plays(songID types.MD5Hash) map[string]interface{} {
-	// TODO: Real song lookup
-	sp := &types.SongPlay{
-		PlayCount: 2,
+	plays, isPlayed := s.ScoreData.SongPlays[songID]
+	if isPlayed {
+		return jsIfy(s.vm, plays)
 	}
-
-	return jsIfy(s.vm, sp)
+	return nil
 }
 
 func (s *StoryHeroState) useState(init goja.Callable) []goja.Callable {

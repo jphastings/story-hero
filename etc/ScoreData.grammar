@@ -1,29 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ufwb version="1.24">
-    <grammar name="Clone Hero Scores" start="id:70" author="JP Hastings-Spital" email="hello@byjp.me" fileextension=".bin">
+    <grammar name="Clone Hero Scores" start="id:14" author="JP Hastings-Spital" email="hello@byjp.me" fileextension=".bin">
         <description>A first pass at Song Hero's score data format. (`scoredata.bin`)
 
 There are a few fields I'm not following, but this covers all the data I can find online, or can reverse engineer myself.</description>
-        <structure name="ScoreData" id="70" encoding="ISO_8859-1:1987" endian="little" signed="no">
-            <structure name="Header" id="71" length="0">
-                <binary name="Magic Number" id="72" length="4"/>
-                <number name="Song_count" id="73" type="integer" length="4"/>
+        <structure name="ScoreData" id="14" encoding="ISO_8859-1:1987" endian="little" signed="no">
+            <structure name="Header" id="15" length="0">
+                <binary name="Magic Number" id="16" length="4"/>
+                <number name="Song_count" id="17" type="integer" length="4"/>
             </structure>
-            <structure name="Score" id="75" length="0" repeatmin="Song_count" repeatmax="Song_count">
-                <binary name="Song ID" id="76" length="16">
+            <structure name="Score" id="19" length="0" repeatmin="Song_count" repeatmax="Song_count">
+                <binary name="Song ID" id="20" length="16">
                     <description>This is the MD5 hash of the notes.mid file.
 </description>
                 </binary>
-                <number name="Instrument_count" id="77" type="integer" length="1"/>
-                <number name="Play_count" id="78" type="integer" length="3"/>
-                <structure name="Instrument" id="79" repeatmin="Instrument_count" repeatmax="Instrument_count">
-                    <number name="Instrument type" id="80" type="integer" length="2">
+                <number name="Instrument_count" id="21" type="integer" length="1"/>
+                <number name="Play_count" id="22" type="integer" length="3"/>
+                <structure name="Instrument" id="23" repeatmin="Instrument_count" repeatmax="Instrument_count">
+                    <number name="Instrument type" id="24" type="integer" length="2">
                         <fixedvalues>
                             <fixedvalue name="Guitar" value="0"/>
                             <fixedvalue name="Bass" value="8"/>
                         </fixedvalues>
                     </number>
-                    <binary name="Difficulty" id="81" length="1">
+                    <binary name="Difficulty" id="25" length="1">
                         <fixedvalues>
                             <fixedvalue name="Easy" value="00"/>
                             <fixedvalue name="Medium" value="01"/>
@@ -31,15 +31,15 @@ There are a few fields I'm not following, but this covers all the data I can fin
                             <fixedvalue name="Expert" value="03"/>
                         </fixedvalues>
                     </binary>
-                    <number name="Score % (numerator)" id="82" type="integer" length="2"/>
-                    <number name="Score % (denominator)" id="83" type="integer" length="2"/>
-                    <number name="Stars" id="84" type="integer" length="1"/>
-                    <binary name="(Fixed value)" mustmatch="yes" id="85" length="4">
+                    <number name="Score %" id="26" type="integer" length="2"/>
+                    <number name="Speed %" id="27" type="integer" length="2"/>
+                    <number name="Stars" id="28" type="integer" length="1"/>
+                    <binary name="Modifiers?" id="29" length="4">
                         <fixedvalues>
-                            <fixedvalue name="Fixed value" value="01000000"/>
+                            <fixedvalue name="Default" value="01000000"/>
                         </fixedvalues>
                     </binary>
-                    <number name="Score" id="86" type="integer" length="4"/>
+                    <number name="Score" id="30" type="integer" length="4"/>
                 </structure>
             </structure>
         </structure>

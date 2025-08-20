@@ -3,7 +3,7 @@
     "lib": ["ES2023"],
     "baseUrl": "../../",
     "paths": {
-      "storymode": ["./index.d.ts"]
+      "story-hero": ["./index.d.ts"]
     }
   }
 }

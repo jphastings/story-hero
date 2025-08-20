@@ -1,9 +1,9 @@
-import { MD5Hash, Story } from "storymode"
+import { MD5Hash, Story } from "story-hero"
 
 // Unlock functions
 
-const isGroupCompleted = (groupTitle: string): boolean =>
-  story.groups.find((g) => g.title == groupTitle)?.songs.every((songID) => plays(songID)?.playCount)
+const isGroupCompleted = (groupTitle: string): boolean => 
+  story.groups.find((g) => g.title == groupTitle)?.songs?.every((songID) => plays(songID)?.playCount > 0)
 
 const isSongPurchased: UnlockFunc = (songID: MD5Hash): boolean => getState().purchasedSongs[songID] === true
 

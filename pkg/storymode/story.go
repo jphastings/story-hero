@@ -16,14 +16,16 @@ type StoryHeroState struct {
 	ScoreData *clonehero.ScoreData
 	Story     *types.Story
 
-	vm    *goja.Runtime
-	state goja.Value
+	vm          *goja.Runtime
+	state       goja.Value
+	songPresent func(types.MD5Hash) bool
 }
 
-func LoadStory(r io.Reader, sc *clonehero.SongCache, sd *clonehero.ScoreData) (*StoryHeroState, error) {
+func LoadStory(r io.Reader, sc *clonehero.SongCache, sd *clonehero.ScoreData, songPresent func(types.MD5Hash) bool) (*StoryHeroState, error) {
 	s := &StoryHeroState{
-		SongCache: sc,
-		ScoreData: sd,
+		SongCache:   sc,
+		ScoreData:   sd,
+		songPresent: songPresent,
 	}
 
 	s.prepareVM()
@@ -33,6 +35,17 @@ func LoadStory(r io.Reader, sc *clonehero.SongCache, sd *clonehero.ScoreData) (*
 	}
 
 	return s, nil
+}
+
+func (s *StoryHeroState) Usable() bool {
+	for _, g := range s.Story.Groups {
+		for _, songID := range g.Songs {
+			if !s.songPresent(songID) {
+				return false
+			}
+		}
+	}
+	return true
 }
 
 func (s *StoryHeroState) parseStory(r io.Reader) error {
@@ -48,7 +61,7 @@ func (s *StoryHeroState) parseStory(r io.Reader) error {
 	return nil
 }
 
-func (s *StoryHeroState) SongAvailability() (map[types.MD5Hash]bool, error) {
+func (s *StoryHeroState) SongVisibility() (map[types.MD5Hash]bool, error) {
 	availability := make(map[types.MD5Hash]bool)
 
 	for _, g := range s.Story.Groups {

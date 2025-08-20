@@ -5,33 +5,101 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
-	"math/big"
+	"log"
 	"os"
+	"sync"
+	"time"
 
+	"github.com/fsnotify/fsnotify"
 	"github.com/jphastings/story-hero/pkg/types"
 )
 
 type ScoreData struct {
-	f         *os.File
+	path      string
 	SongPlays map[types.MD5Hash]types.SongPlay
 }
 
-func OpenScoreData(f *os.File) (*ScoreData, error) {
-	sd := &ScoreData{f: f}
+func OpenScoreData(path string) (*ScoreData, error) {
+	sd := &ScoreData{path: path}
 	if err := sd.Reload(); err != nil {
 		return nil, err
 	}
 	return sd, nil
 }
 
-func (sd *ScoreData) Reload() error {
-	_, err := sd.f.Seek(0, io.SeekStart)
+// A blocking function that watches for the specific file to change, and calls the given function when it does
+// It also calls the callback immediately upon being run, as a first pass.
+func (sd *ScoreData) Watch(callback func() error) error {
+	log.Println("INFO: performing callback")
+	if err := callback(); err != nil {
+		return err
+	}
+	log.Println("INFO: callback complete")
+
+	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
+		return err
+	}
+	defer watcher.Close()
+
+	err = watcher.Add(sd.path)
+	if err != nil {
+		return err
+	}
+
+	var mu sync.Mutex
+	var debounceTimer *time.Timer
+	const debounceDelay = 100 * time.Millisecond
+
+	for {
+		select {
+		case event := <-watcher.Events:
+			if !event.Has(fsnotify.Write) {
+				continue
+			}
+
+			// Reset the timer if it's already going
+			if debounceTimer != nil {
+				debounceTimer.Stop()
+			}
+			debounceTimer = time.AfterFunc(debounceDelay, func() {
+				mu.Lock()
+				defer mu.Unlock()
+
+				if err := sd.Reload(); err != nil {
+					log.Printf("ERROR: (while reloading Score Data in watcher callback) %s\n", err.Error())
+					return
+				}
+
+				log.Println("INFO: performing callback")
+
+				if err := callback(); err != nil {
+					log.Printf("ERROR: (while performing watcher callback) %s\n", err.Error())
+					return
+				}
+
+				log.Println("INFO: callback complete")
+			})
+
+		case err := <-watcher.Errors:
+			return err
+		}
+	}
+}
+
+func (sd *ScoreData) Reload() error {
+	f, err := os.Open(sd.path)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	if _, err := f.Seek(0, io.SeekStart); err != nil {
 		return fmt.Errorf("unable to interact with the ScoreData file: %w", err)
 	}
 
 	header := make([]byte, 8)
-	if _, err := sd.f.Read(header); err != nil {
+	if _, err := f.Read(header); err != nil {
 		return fmt.Errorf("failed to read header: %w", err)
 	}
 
@@ -45,17 +113,17 @@ func (sd *ScoreData) Reload() error {
 	sd.SongPlays = make(map[types.MD5Hash]types.SongPlay)
 
 	for i := uint32(0); i < songCount; i++ {
-		songID, err := readSongID(sd.f)
+		songID, err := readSongID(f)
 		if err != nil {
 			return err
 		}
 
-		instrumentCount, err := readUint8(sd.f)
+		instrumentCount, err := readUint8(f)
 		if err != nil {
 			return err
 		}
 
-		playCount, err := readUint24(sd.f)
+		playCount, err := readUint24(f)
 		if err != nil {
 			return err
 		}
@@ -68,32 +136,37 @@ func (sd *ScoreData) Reload() error {
 
 		// Read instruments
 		for j := uint(0); j < instrumentCount; j++ {
-			instrumentType, err := readUint16(sd.f)
+			instrumentType, err := readUint16(f)
 			if err != nil {
 				return err
 			}
 
-			difficulty, err := readUint8(sd.f)
+			difficulty, err := readUint8(f)
 			if err != nil {
 				return err
 			}
 
-			percentage, err := sd.readPercentage()
+			percentage, err := readUint16(f)
 			if err != nil {
 				return err
 			}
 
-			stars, err := readUint8(sd.f)
+			speed, err := readUint16(f)
+			if err != nil {
+				return err
+			}
+
+			stars, err := readUint8(f)
 			if err != nil {
 				return err
 			}
 
 			// Skip unneeded values
-			if err := skipBytes(sd.f, 4); err != nil {
+			if err := skipBytes(f, 4); err != nil {
 				return err
 			}
 
-			score, err := readUint32(sd.f)
+			score, err := readUint32(f)
 			if err != nil {
 				return err
 			}
@@ -101,6 +174,7 @@ func (sd *ScoreData) Reload() error {
 			songPlay.Scores[instrumentType] = types.Score{
 				Difficulty: difficulty,
 				Percentage: percentage,
+				Speed:      speed,
 				Stars:      stars,
 				Score:      score,
 			}
@@ -110,20 +184,4 @@ func (sd *ScoreData) Reload() error {
 	}
 
 	return nil
-}
-
-func (sd *ScoreData) readPercentage() (*big.Rat, error) {
-	numeratorBuf := make([]byte, 2)
-	if _, err := sd.f.Read(numeratorBuf); err != nil {
-		return nil, fmt.Errorf("failed to read score numerator: %w", err)
-	}
-	numerator := binary.LittleEndian.Uint16(numeratorBuf)
-
-	denominatorBuf := make([]byte, 2)
-	if _, err := sd.f.Read(denominatorBuf); err != nil {
-		return nil, fmt.Errorf("failed to read score denominator: %w", err)
-	}
-	denominator := binary.LittleEndian.Uint16(denominatorBuf)
-
-	return big.NewRat(int64(numerator), int64(denominator)), nil
 }

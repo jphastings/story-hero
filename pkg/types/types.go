@@ -3,7 +3,6 @@ package types
 import (
 	"encoding/hex"
 	"fmt"
-	"math/big"
 
 	"github.com/dop251/goja"
 )
@@ -12,30 +11,31 @@ import (
 //go:generate tygo generate
 
 type Story struct {
-	Title  string  `json:"title"`
-	Groups []Group `json:"groups"`
+	Title  string  `mapstructure:"title"`
+	Groups []Group `mapstructure:"groups"`
 }
 
 type Group struct {
-	Title           string                             `json:"title"`
-	Songs           []MD5Hash                          `json:"songs"`
-	IsUnlocked      func(goja.FunctionCall) goja.Value `json:"isUnlocked,omitempty" tstype:"UnlockFunc"`
-	LockedMessage   string                             `json:"lockedMessage,omitempty"`
-	ShowLockedSongs bool                               `json:"showLockedSongs,omitempty"`
-	UnlockAction    func(goja.FunctionCall) goja.Value `json:"unlockAction,omitempty" tstype:"ActionFunc"`
+	Title           string                             `mapstructure:"title"`
+	Songs           []MD5Hash                          `mapstructure:"songs"`
+	IsUnlocked      func(goja.FunctionCall) goja.Value `mapstructure:"isUnlocked,omitempty" tstype:"UnlockFunc"`
+	LockedMessage   string                             `mapstructure:"lockedMessage,omitempty"`
+	ShowLockedSongs bool                               `mapstructure:"showLockedSongs,omitempty"`
+	UnlockAction    func(goja.FunctionCall) goja.Value `mapstructure:"unlockAction,omitempty" tstype:"ActionFunc"`
 }
 
 type SongPlay struct {
-	ID        MD5Hash        `json:"id"`
-	PlayCount uint           `json:"playCount"`
-	Scores    map[uint]Score `json:"scores" tstype:"PerInstrumentScore"`
+	ID        MD5Hash        `mapstructure:"id"`
+	PlayCount uint           `mapstructure:"playCount"`
+	Scores    map[uint]Score `mapstructure:"scores" tstype:"PerInstrumentScore"`
 }
 
 type Score struct {
-	Difficulty uint     `json:"difficulty" tstype:"Difficulty"`
-	Percentage *big.Rat `json:"percentage" tstype:"number"`
-	Stars      uint     `json:"stars"`
-	Score      uint     `json:"score"`
+	Difficulty uint `mapstructure:"difficulty" tstype:"Difficulty"`
+	Percentage uint `mapstructure:"percentage" tstype:"number"`
+	Speed      uint `mapstructure:"speed" tstype:"number"`
+	Stars      uint `mapstructure:"stars"`
+	Score      uint `mapstructure:"score"`
 }
 
 type MD5Hash string

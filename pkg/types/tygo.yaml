@@ -17,12 +17,13 @@ packages:
         function totalStars(): number
         // A convenience method that returns the total score (for the best gig across instruments) for all songs in all groups in this story
         function totalScore(): number
-        // A convenience method that returns the number of songs in this story with a best score (across instruments) equal to (only: true) or equal/greater than (only: false) the number provided
-        function countMeetingScore(score: number, only: boolean): number
-        // A convenience method that returns the number of songs in this story with a best percentage (across instruments) equal to (only: true) or equal/greater than (only: false) the number provided
-        function countMeetingPercentage(score: number, only: boolean): number
-        // A convenience method that returns the number of songs in this story with best stars (across instruments) equal to (only: true) or equal/greater than (only: false) the number provided
-        function countMeetingStars(stars: number, only: boolean): number
+
+        // A convenience method that returns the number of songs with a best score (across instruments) equal to (exactly: true) or equal/greater than (exactly: false) the number provided
+        function countMeetingScore(score: number, exactly: boolean): number
+        // A convenience method that returns the number of songs with a best percentage (across instruments) equal to (exactly: true) or equal/greater than (exactly: false) the number provided
+        function countMeetingPercentage(score: number, exactly: boolean): number
+        // A convenience method that returns the number of songs with best stars (across instruments) equal to (exactly: true) or equal/greater than (exactly: false) the number provided
+        function countMeetingStars(stars: number, exactly: boolean): number
 
         export enum Difficulty {
           Easy = 0,
