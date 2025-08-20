@@ -8,7 +8,7 @@ import (
 	"math/big"
 	"os"
 
-	"github.com/jphastings/clone-hero-storymode/pkg/types"
+	"github.com/jphastings/story-hero/pkg/types"
 )
 
 type ScoreData struct {

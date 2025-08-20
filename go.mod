@@ -1,4 +1,4 @@
-module github.com/jphastings/clone-hero-storymode
+module github.com/jphastings/story-hero
 
 go 1.24.3
 

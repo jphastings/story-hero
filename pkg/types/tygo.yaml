@@ -1,5 +1,5 @@
 packages:
-  - path: "github.com/jphastings/clone-hero-storymode/pkg/types"
+  - path: "github.com/jphastings/story-hero/pkg/types"
     output_path: "../index.d.ts"
     frontmatter: |
       declare global {

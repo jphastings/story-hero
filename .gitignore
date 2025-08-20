@@ -1,2 +1,4 @@
 scoredata.bin
 songcache.bin
+# Added by goreleaser init:
+dist/

@@ -4,7 +4,7 @@ import (
 	"reflect"
 
 	"github.com/dop251/goja"
-	"github.com/jphastings/clone-hero-storymode/pkg/types"
+	"github.com/jphastings/story-hero/pkg/types"
 	"github.com/mitchellh/mapstructure"
 )
 

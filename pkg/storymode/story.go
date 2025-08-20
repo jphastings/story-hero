@@ -7,8 +7,8 @@ import (
 	"github.com/clarkmcc/go-typescript"
 	"github.com/dop251/goja"
 
-	"github.com/jphastings/clone-hero-storymode/pkg/clonehero"
-	"github.com/jphastings/clone-hero-storymode/pkg/types"
+	"github.com/jphastings/story-hero/pkg/clonehero"
+	"github.com/jphastings/story-hero/pkg/types"
 )
 
 type StoryHeroState struct {

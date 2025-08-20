@@ -5,7 +5,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/jphastings/clone-hero-storymode/pkg/types"
+	"github.com/jphastings/story-hero/pkg/types"
 )
 
 type SongCache struct {

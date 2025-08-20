@@ -5,7 +5,7 @@ import (
 
 	"github.com/dop251/goja"
 	"github.com/go-viper/mapstructure/v2"
-	"github.com/jphastings/clone-hero-storymode/pkg/types"
+	"github.com/jphastings/story-hero/pkg/types"
 )
 
 func (s *StoryHeroState) prepareVM() {

@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/fsnotify/fsnotify"
-	"github.com/jphastings/clone-hero-storymode/pkg/clonehero"
-	"github.com/jphastings/clone-hero-storymode/pkg/storymode"
+	"github.com/jphastings/story-hero/pkg/clonehero"
+	"github.com/jphastings/story-hero/pkg/storymode"
 )
 
 func check(err error) {
@@ -24,7 +24,7 @@ const (
 )
 
 func main() {
-	sf, err := os.Open("./pkg/storymode/fixtures/gh1.ts")
+	sf, err := os.Open("./pkg/storymode/fixtures/gh1.story.ts")
 	check(err)
 	scf, err := os.Open(supportDirPath(songCacheFile))
 	check(err)
@@ -36,6 +36,9 @@ func main() {
 	sd, err := clonehero.OpenScoreData(sdf)
 	check(err)
 
+	// TODO: Read clone hero ini file
+	// TODO: Read all song dirs for .story.ts files
+	// TODO: Disable stories that have missing songs
 	s, err := storymode.LoadStory(sf, sc, sd)
 	check(err)
 

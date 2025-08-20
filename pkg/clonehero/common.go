@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/jphastings/clone-hero-storymode/pkg/types"
+	"github.com/jphastings/story-hero/pkg/types"
 )
 
 func readSongID(r io.Reader) (types.MD5Hash, error) {

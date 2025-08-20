@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/jphastings/clone-hero-storymode/pkg/storymode"
+	"github.com/jphastings/story-hero/pkg/storymode"
 	"github.com/stretchr/testify/assert"
 )
 
