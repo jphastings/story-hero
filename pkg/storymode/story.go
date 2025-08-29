@@ -3,8 +3,8 @@ package storymode
 import (
 	"fmt"
 	"io"
+	"log"
 
-	"github.com/clarkmcc/go-typescript"
 	"github.com/dop251/goja"
 
 	"github.com/jphastings/story-hero/pkg/clonehero"
@@ -30,35 +30,35 @@ func LoadStory(r io.Reader, sc *clonehero.SongCache, sd *clonehero.ScoreData, so
 
 	s.prepareVM()
 
-	if err := s.parseStory(r); err != nil {
+	if err := s.loadHelpers(); err != nil {
 		return nil, err
+	}
+
+	if err := s.executeTypescript(r); err != nil {
+		return nil, err
+	}
+
+	if s.Story == nil {
+		return nil, fmt.Errorf("no story was defined")
 	}
 
 	return s, nil
 }
 
 func (s *StoryHeroState) Usable() bool {
+	if s.Story == nil {
+		return false
+	}
+
 	for _, g := range s.Story.Groups {
 		for _, songID := range g.Songs {
 			if !s.songPresent(songID) {
+				log.Printf("WARN: song '%s' unavailable, story '%s' is unplayable\n", songID, s.Story.Title)
 				return false
 			}
 		}
 	}
 	return true
-}
-
-func (s *StoryHeroState) parseStory(r io.Reader) error {
-	jsCode, err := typescript.Transpile(r, typescript.WithVersion("v4.9.3"))
-	if err != nil {
-		return fmt.Errorf("failed to transpile TypeScript: %w", err)
-	}
-
-	if _, err := s.vm.RunString(jsCode); err != nil {
-		return fmt.Errorf("failed to execute transpiled Story definition: %w", err)
-	}
-
-	return nil
 }
 
 func (s *StoryHeroState) SongVisibility() (map[types.MD5Hash]bool, error) {

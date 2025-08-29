@@ -10,7 +10,7 @@ import (
 
 func check(err error) {
 	if err != nil {
-		panic(err)
+		log.Fatalf("unable to continue: %v", err)
 	}
 }
 
@@ -22,7 +22,7 @@ func main() {
 	check(err)
 
 	if len(ss.ActiveStories) == 0 {
-		log.Fatalf("FATAL: No stories found to load in %s\n", strings.Join(si.Directories.Paths, ", "))
+		log.Fatalf("FATAL: No active stories found to load in '%s'\n", strings.Join(si.Directories.Paths, ", "))
 	}
 
 	for _, s := range ss.ActiveStories {

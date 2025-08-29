@@ -1,6 +1,7 @@
 package storymode
 
 import (
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -9,10 +10,15 @@ import (
 	"github.com/jphastings/story-hero/pkg/types"
 )
 
+const (
+	storySuffix = ".story.ts"
+)
+
 type Stories struct {
-	songCache   *clonehero.SongCache
-	scoreData   *clonehero.ScoreData
-	hiddenSongs map[types.MD5Hash]string
+	songCache     *clonehero.SongCache
+	scoreData     *clonehero.ScoreData
+	unlockedSongs map[types.MD5Hash]string
+	lockedSongs   map[types.MD5Hash]string
 
 	ActiveStories   []*StoryHeroState
 	InactiveStories []string
@@ -24,7 +30,15 @@ func LoadStories(songsPaths []string, sc *clonehero.SongCache, sd *clonehero.Sco
 		scoreData: sd,
 	}
 
-	if err := ss.findHiddenSongs(songsPaths); err != nil {
+	if list, err := ss.findSongs(songsPaths, songIniFile); err == nil {
+		ss.unlockedSongs = list
+	} else {
+		return ss, err
+	}
+
+	if list, err := ss.findSongs(songsPaths, songIniFile+lockSuffix); err == nil {
+		ss.lockedSongs = list
+	} else {
 		return ss, err
 	}
 
@@ -33,25 +47,28 @@ func LoadStories(songsPaths []string, sc *clonehero.SongCache, sd *clonehero.Sco
 			if err != nil {
 				return err
 			}
-			if !d.IsDir() && strings.HasSuffix(path, ".story.ts") {
-				sf, err := os.Open(path)
-				if err != nil {
-					return err
-				}
-				defer sf.Close()
-
-				s, err := LoadStory(sf, sc, sd, ss.songPresent)
-				if err != nil {
-					return err
-				}
-
-				if s.Usable() {
-					ss.ActiveStories = append(ss.ActiveStories, s)
-				} else {
-					ss.InactiveStories = append(ss.InactiveStories, s.Story.Title)
-				}
-
+			if d.IsDir() || !strings.HasSuffix(path, storySuffix) {
+				return nil
 			}
+
+			sf, err := os.Open(path)
+			if err != nil {
+				return err
+			}
+			defer sf.Close()
+
+			s, err := LoadStory(sf, sc, sd, ss.songPresent)
+			if err != nil {
+				log.Printf("WARN: Story file at '%s' ignored: %v", path, err)
+				return nil
+			}
+
+			if s.Usable() {
+				ss.ActiveStories = append(ss.ActiveStories, s)
+			} else {
+				ss.InactiveStories = append(ss.InactiveStories, s.Story.Title)
+			}
+
 			return nil
 		})
 		if err != nil {
@@ -63,11 +80,11 @@ func LoadStories(songsPaths []string, sc *clonehero.SongCache, sd *clonehero.Sco
 }
 
 func (ss Stories) songPresent(songID types.MD5Hash) bool {
-	if _, isVisible := ss.songCache.Songs[songID]; isVisible {
+	if _, isUnlocked := ss.unlockedSongs[songID]; isUnlocked {
 		return true
 	}
 
-	if _, isHidden := ss.hiddenSongs[songID]; isHidden {
+	if _, isLocked := ss.lockedSongs[songID]; isLocked {
 		return true
 	}
 

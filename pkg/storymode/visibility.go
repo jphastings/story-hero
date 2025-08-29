@@ -15,40 +15,50 @@ const (
 	lockSuffix  = ".storylocked"
 )
 
-func (ss *Stories) ToggleVisibility(songID types.MD5Hash, makeVisible bool) error {
-	song, isVisible := ss.songCache.Songs[songID]
-	hiddenSongPath, isHidden := ss.hiddenSongs[songID]
+func (ss *Stories) ToggleVisibility(songID types.MD5Hash, doUnlock bool) error {
+	unlockedSongPath, isUnlocked := ss.unlockedSongs[songID]
+	lockedSongPath, isLocked := ss.lockedSongs[songID]
 
 	switch {
-	case isVisible && makeVisible:
-		// Ignore duplicate hidden song
+	case isUnlocked && doUnlock:
+		// Ignore duplicate locked song
 		return nil
 
-	case !isVisible && !makeVisible:
-		// Ignore if the song is also absent in the hidden songs, it should have been caught at launch
+	case !isUnlocked && !doUnlock:
+		// Ignore if the song is also absent in the locked songs, it should have been caught at launch
 		return nil
 
-	case isVisible && !makeVisible:
-		// Ignore duplicate hidden song
-		songFile := songFile(song.Path)
-		if _, err := os.Stat(songFile); !os.IsNotExist(err) {
-			if err := os.Rename(songFile, songFile+lockSuffix); err != nil {
-				return fmt.Errorf("unable to rename to lock %s: %w", songFile, err)
+	case isUnlocked && !doUnlock:
+		songPath := songFile(unlockedSongPath)
+		// Ignore duplicate locked song
+
+		if _, err := os.Stat(songPath); os.IsNotExist(err) {
+			return fmt.Errorf("a file has been renamed elsewhere since this program started, please restart: %w", err)
+		} else if err != nil {
+			return err
+		} else {
+			if err := os.Rename(songPath, songPath+lockSuffix); err != nil {
+				return fmt.Errorf("unable to rename to lock %s: %w", songPath, err)
 			}
 		}
 
 		// Note: the player will need to "Scan songs" to have this reflected in their game state; which is annoying
-		ss.hiddenSongs[songID] = song.Path
-		delete(ss.songCache.Songs, songID)
+		ss.lockedSongs[songID] = unlockedSongPath
+		delete(ss.unlockedSongs, songID)
 
 		return nil
 
-	case isHidden && makeVisible:
+	case isLocked && doUnlock:
+		songPath := songFile(lockedSongPath)
+
 		// This would never be called if there was a duplicate song in the visible songs set (because this case is last)
-		songFile := songFile(hiddenSongPath)
-		if err := os.Rename(songFile+lockSuffix, songFile); err != nil {
-			return fmt.Errorf("unable to rename to unlock %s: %w", songFile+lockSuffix, err)
+		if err := os.Rename(songPath+lockSuffix, songPath); err != nil {
+			return fmt.Errorf("unable to rename to unlock %s: %w", songPath+lockSuffix, err)
 		}
+
+		// Note: the player will need to "Scan songs" to have this reflected in their game state; which is annoying
+		ss.unlockedSongs[songID] = lockedSongPath
+		delete(ss.lockedSongs, songID)
 
 		return nil
 	}
@@ -63,20 +73,19 @@ func songFile(songPath string) string {
 	return filepath.Join(songPath, songIniFile)
 }
 
-func (ss *Stories) findHiddenSongs(songsPaths []string) error {
-	ss.hiddenSongs = make(map[types.MD5Hash]string)
+func (ss *Stories) findSongs(songsPaths []string, filename string) (map[types.MD5Hash]string, error) {
+	list := make(map[types.MD5Hash]string)
 
 	for _, songsPath := range songsPaths {
 		err := filepath.Walk(songsPath, func(path string, info os.FileInfo, err error) error {
 			if err != nil {
 				return err
 			}
-			if info.IsDir() || filepath.Ext(path) != lockSuffix {
+			if info.IsDir() || filepath.Base(path) != filename {
 				return nil
 			}
 
 			// TODO: Handle .sng files
-			// Remove the song.ini.storylocked filename
 			songDir := filepath.Dir(path)
 
 			nf, err := os.Open(filepath.Join(songDir, "notes.mid"))
@@ -91,14 +100,14 @@ func (ss *Stories) findHiddenSongs(songsPaths []string) error {
 			}
 			songID := types.MD5HashFromBytes([16]byte(hash.Sum(nil)))
 
-			ss.hiddenSongs[songID] = songDir
+			list[songID] = songDir
 
 			return nil
 		})
 		if err != nil {
-			return fmt.Errorf("error scanning songs path %s: %w", songsPath, err)
+			return nil, fmt.Errorf("error scanning songs path %s: %w", songsPath, err)
 		}
 	}
 
-	return nil
+	return list, nil
 }

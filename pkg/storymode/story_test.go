@@ -9,11 +9,11 @@ import (
 )
 
 func TestParseGH1Fixture(t *testing.T) {
-	file, err := os.Open("fixtures/gh1.ts")
+	file, err := os.Open("fixtures/guitar-hero.story.ts")
 	assert.NoError(t, err, "Failed to open fixture file")
 	defer file.Close()
 
-	s, err := storymode.LoadStory(file, nil, nil)
+	s, err := storymode.LoadStory(file, nil, nil, nil)
 	assert.NoError(t, err, "Failed to parse story")
 
 	assert.Equal(t, "Guitar Hero", s.Story.Title)
