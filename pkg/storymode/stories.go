@@ -1,12 +1,17 @@
 package storymode
 
 import (
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/jphastings/story-hero/pkg/clonehero"
 	"github.com/jphastings/story-hero/pkg/types"
+)
+
+const (
+	storySuffix = ".story.ts"
 )
 
 type Stories struct {
@@ -33,25 +38,28 @@ func LoadStories(songsPaths []string, sc *clonehero.SongCache, sd *clonehero.Sco
 			if err != nil {
 				return err
 			}
-			if !d.IsDir() && strings.HasSuffix(path, ".story.ts") {
-				sf, err := os.Open(path)
-				if err != nil {
-					return err
-				}
-				defer sf.Close()
-
-				s, err := LoadStory(sf, sc, sd, ss.songPresent)
-				if err != nil {
-					return err
-				}
-
-				if s.Usable() {
-					ss.ActiveStories = append(ss.ActiveStories, s)
-				} else {
-					ss.InactiveStories = append(ss.InactiveStories, s.Story.Title)
-				}
-
+			if d.IsDir() || !strings.HasSuffix(path, storySuffix) {
+				return nil
 			}
+
+			sf, err := os.Open(path)
+			if err != nil {
+				return err
+			}
+			defer sf.Close()
+
+			s, err := LoadStory(sf, sc, sd, ss.songPresent)
+			if err != nil {
+				log.Printf("WARN: Story file at '%s' ignored: %v", path, err)
+				return nil
+			}
+
+			if s.Usable() {
+				ss.ActiveStories = append(ss.ActiveStories, s)
+			} else {
+				ss.InactiveStories = append(ss.InactiveStories, s.Story.Title)
+			}
+
 			return nil
 		})
 		if err != nil {

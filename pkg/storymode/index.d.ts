@@ -2,6 +2,9 @@
 declare global {
   // Define the details of your story
   function defineStory(story: Story): void
+
+  // Access to your story, once its been defined
+  function story(): Story
           
   // Configure this story to use state
   // If your state uses any convenience methods, make sure you've called storyDefinition first
@@ -9,18 +12,6 @@ declare global {
 
   // Details of the (best) plays for the song with the given ID
   function plays(id: MD5Hash): SongPlay | undefined
-
-  // A convenience method that returns the total stars (for the best gig across instruments) for all songs in all groups in this story
-  function totalStars(): number
-  // A convenience method that returns the total score (for the best gig across instruments) for all songs in all groups in this story
-  function totalScore(): number
-
-  // A convenience method that returns the number of songs with a best score (across instruments) equal to (exactly: true) or equal/greater than (exactly: false) the number provided
-  function countMeetingScore(score: number, exactly: boolean): number
-  // A convenience method that returns the number of songs with a best percentage (across instruments) equal to (exactly: true) or equal/greater than (exactly: false) the number provided
-  function countMeetingPercentage(score: number, exactly: boolean): number
-  // A convenience method that returns the number of songs with best stars (across instruments) equal to (exactly: true) or equal/greater than (exactly: false) the number provided
-  function countMeetingStars(stars: number, exactly: boolean): number
 
   export enum Difficulty {
     Easy = 0,
@@ -34,10 +25,38 @@ declare global {
   }
 
   type PerInstrumentScore = Record<Instrument, Score>
+
+  // A function which checks some aspect of the story, and judges whether the bar has been met or not
+  type StoryJudge = (...any) => UnlockFunc
+  // A function which checks all the songs provided, and judges whether the bar has been met or not
+  type SongsJudge = (songIDs?: Array<MD5Hash>) => boolean
+  
+
   // A function which declares whether a given song is unlocked
-  type UnlockFunc = (songID: MD5Hash) => boolean
+  type UnlockFunc = (this: Group, songID: MD5Hash) => boolean
+  // A function which creates an UnlockFunc; useful for making reusable & configurable unlock functions
+  type UnlockFuncFactory = (...any) => UnlockFunc
+
   // A function which defines an action on a song, and whether that action can currently be performed
   type ActionFunc = (songID: MD5Hash) => boolean | (() => void)
+
+  /* From implementations.ts */
+  function allSongs(): Array<MD5Hash>
+  function bestAmount(songID: MD5Hash, mapper: (Score) => number): number
+
+  const allCompleted: SongsJudge
+  function enoughStars(stars: number): UnlockFunc
+
+  function previousGroupMeets(judge: SongsJudge): UnlockFunc
+
+  function lastAreEncores(n: number, encoreJudge: SongsJudge, others?: UnlockFunc): UnlockFunc
+
+  // A convenience method that returns the number of songs with best stars (across instruments) equal to (exactly: true) or equal/greater than (exactly: false) the number provided
+  function countMeeting(needed: number, mapper: (Score) => number, exactly?: boolean): number
+
+  function ofStars(s: Score): number
+  function ofPercentage(s: Score): number
+  function ofScore(s: Score): number
 }
 
 //////////

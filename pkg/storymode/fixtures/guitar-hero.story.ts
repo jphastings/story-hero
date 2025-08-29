@@ -1,9 +1,6 @@
-import { MD5Hash, Story } from "story-hero"
+import { MD5Hash, Story, previousGroupMeets, allCompleted } from "story-hero"
 
 // Unlock functions
-
-const isGroupCompleted = (groupTitle: string): boolean => 
-  story.groups.find((g) => g.title == groupTitle)?.songs?.every((songID) => plays(songID)?.playCount > 0)
 
 const isSongPurchased: UnlockFunc = (songID: MD5Hash): boolean => getState().purchasedSongs[songID] === true
 
@@ -105,7 +102,7 @@ const story: Story = {
         // ZZ Top - Sharp Dressed Man
         "778eb140327326172d256528bbdec9ff"
       ],
-      isUnlocked: (_) => isGroupCompleted('Opening Licks'),
+      isUnlocked: previousGroupMeets(allCompleted),
       lockedMessage
     },
     {
@@ -122,7 +119,7 @@ const story: Story = {
         // Megadeth - Symphony of Destruction
         "7ac8287a899ebbf095a836b97968c185"
       ],
-      isUnlocked: (_) => isGroupCompleted('Axe-Grinders'),
+      isUnlocked: previousGroupMeets(allCompleted),
       lockedMessage
     }, {
       title: "Return of the Shred",
@@ -138,7 +135,7 @@ const story: Story = {
         // Helmet - Unsung
         "90d19bede0572f4b53800eaa9a5f07dd"
       ],
-      isUnlocked: (_) => isGroupCompleted('Thrash and Burn'),
+      isUnlocked: previousGroupMeets(allCompleted),
       lockedMessage
     }, {
       title: "Fret-Burners",
@@ -154,7 +151,7 @@ const story: Story = {
         // Cream - Crossroads
         "847fc809b488b6fe7d2dd24ae71081ed"
       ],
-      isUnlocked: (_) => isGroupCompleted('Return of the Shred'),
+      isUnlocked: previousGroupMeets(allCompleted),
       lockedMessage
     }, {
       title: "Face Melters",
@@ -170,7 +167,7 @@ const story: Story = {
         // Ozzy Osbourne - Bark at the Moon
         "9334d685bc36a1b75d741355c8378f23"
       ],
-      isUnlocked: (_) => isGroupCompleted('Fret-Burners'),
+      isUnlocked: previousGroupMeets(allCompleted),
       lockedMessage
     },
     {
