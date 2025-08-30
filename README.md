@@ -38,6 +38,7 @@ I'll gladly take suggestions for improving these (just raise an issue here on Gi
 
 - [x] Read story definition files from within the configured Clone Hero song directories
 - [x] Only enable stories you have the songs for
+- [x] Switch to scanning for _active_ songs (currently we depend on the `songcache.bin` being up to date; a story will break if our tool is run twice when running it enabled some songs)
 - [ ] Better logging, feedback & reliability
 - [ ] OMG tests.
   - Something simple to cover the TypeScript <-> Go conversion would be good
