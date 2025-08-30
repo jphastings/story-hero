@@ -1,8 +1,7 @@
 import { MD5Hash, Score } from 'story-hero'
 
 function allSongs(): Array<MD5Hash> {
-  // TODO: Fix Songs -> songs when deep mapping is complete
-  return story().groups.flatMap((g) => g.Songs)
+  return story().groups.flatMap((g) => fixDeep(g, 'Songs'))
 }
 
 function bestAmount(songID: MD5Hash, mapper: (Score) => number): number {
@@ -14,19 +13,29 @@ function bestAmount(songID: MD5Hash, mapper: (Score) => number): number {
   return Math.max(...Object.values(play.scores).map(mapper))
 }
 
-export const allCompleted: SongsJudge = (songIDs: Array<MD5Hash>|undefined) => !!songIDs && songIDs.every((songID) => (plays(songID)?.playCount || 0) > 0)
+export const allCompleted: SongsJudge = (songIDs: Array<MD5Hash>|undefined) => {
+  if (!songIDs) {
+    return false
+  }
+
+  return songIDs.every((songID) => {
+    const plys = plays(songID)
+    if (!plys) {
+      return false
+    }
+    return fixDeep(plys, 'PlayCount') > 0
+  })
+}
 export const enoughStars: StoryJudge = (stars: number) => (_) => allSongs().reduce((_, songID: MD5Hash) => bestAmount(songID, ofStars), 0) >= stars
 
 export function previousGroupMeets(judge: SongsJudge): UnlockFunc {
   return function() {
     const group = this
     
-    // TODO: Fix Title -> title when deep mapping is complete
-    const groupIndex = story().groups.findIndex((g) => g.Title == group.title)
+    const groupIndex = story().groups.findIndex((g) => fixDeep(g, 'Title') == group.title)
     const previousGroup = story().groups[groupIndex - 1]
 
-    // TODO: Fix Songs -> songs when deep mapping is complete
-    return judge(previousGroup.Songs)
+    return judge(fixDeep(previousGroup, 'Songs'))
   }
 }
 
@@ -34,13 +43,16 @@ export const lastAreEncores: UnlockFuncFactory = (n: number, encoreJudge: SongsJ
   return function (songID: MD5Hash): boolean {
     const group = this
 
-    const encoreAfter = group.songs.length - n - 1
-    if (group.songs.indexOf(songID) <= encoreAfter) {
-      return others?.bind(this)(songID) || true
+    const songs = fixDeep(group, 'Songs')
+    const encoreAfter = songs.length - n - 1
+    if (songs.indexOf(songID) <= encoreAfter) {
+      if (!others) {
+        return true
+      }
+      return others.bind(this)(songID)
     }
 
-    // TODO: Fix Songs -> songs when deep mapping is complete
-    return encoreJudge(group.Songs.slice(0, -n))
+    return encoreJudge(songs.slice(0, -n))
   }
 }
 
@@ -56,6 +68,11 @@ export function countMeeting(needed: number, mapper: (Score) => number, exactly?
   }, 0)
 }
 
-export const ofStars = (s: Score): number => s.stars
-export const ofPercentage = (s: Score): number => s.percentage
-export const ofScore = (s: Score): number => s.score
+export const ofStars = (s: Score): number => fixDeep(s, 'Stars')
+export const ofPercentage = (s: Score): number => fixDeep(s, 'Percentage')
+export const ofScore = (s: Score): number => fixDeep(s, 'Score')
+
+// TODO: This won't be necessary once deep mapping works. See https://github.com/go-viper/mapstructure/pull/53
+function fixDeep(object, key) {
+  return object[key] || object[key.toLowerCase()]
+}
